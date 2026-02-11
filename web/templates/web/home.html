@@ -1,0 +1,168 @@
+{% extends 'web/base.html' %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+  <h2 class="text-center mb-4">Stats</h2>
+
+  <div class="row mb-4">
+
+    <div class="col-md-6">
+      <div class="card text-center shadow p-3">
+        <h5>Total Schools</h5>
+        <h2 class="text-primary">{{ total_schools }}</h2>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card text-center shadow p-3">
+        <h5>Total Books</h5>
+        <h2 class="text-success">{{ total_books }}</h2>
+      </div>
+    </div>
+
+  </div>
+
+    <div class="container mt-4">
+
+  <h2 class="text-center mb-4">Dashboard</h2>
+
+  <div class="row">
+
+    <div class="col-md-6">
+      <div class="card p-3 shadow">
+        <h4>Schools</h4>
+        {% if user.is_superuser %}
+        <span><a href="{% url 'addschool' %}">Add school</a></span>
+        {% endif %}
+        <ul class="list-group">
+          {% for school in schools %}
+          <li class="list-group-item">
+            <strong>{{ school.name }}</strong><br>
+            {{ school.location }} | {{ school.year }}
+            <div>
+
+              {% if user.is_superuser %}
+              <a href="{% url 'editschool' school.id %}" class="btn btn-sm btn-warning">Edit</a>
+              <a href="{% url 'deleteschool' school.id %}" class="btn btn-sm btn-danger">Delete</a>
+              {% endif %}
+
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <nav>
+          <ul class="pagination justify-content-center mt-2">
+            {% if schools.has_previous %}
+              <li class="page-item">
+                <a class="page-link"
+                  href="?school_page={{ schools.previous_page_number }}&school_search={{ request.GET.school_search }}">
+                  Previous
+                </a>
+              </li>
+            {% endif %}
+
+            <li class="page-item disabled">
+              <span class="page-link">
+                Page {{ schools.number }} of {{ schools.paginator.num_pages }}
+              </span>
+            </li>
+
+            {% if schools.has_next %}
+              <li class="page-item">
+                <a class="page-link"
+                  href="?school_page={{ schools.next_page_number }}&school_search={{ request.GET.school_search }}">
+                  Next
+                </a>
+              </li>
+            {% endif %}
+          </ul>
+        </nav>
+
+
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card p-3 shadow">
+        <h4>Books</h4>
+        {% if user.is_superuser %}
+        <span><a href="{% url 'addbook' %}">Add book</a></span>
+        {% endif %}
+        <ul class="list-group">
+          {% for book in books %}
+          <li class="list-group-item">
+            {{ book.title }} — {{ book.author }}
+            <div>
+              {% if user.is_superuser %}
+              <a href="{% url 'editbook' book.id %}" class="btn btn-sm btn-warning">Edit</a>
+              <a href="{% url 'deletebook' book.id %}" class="btn btn-sm btn-danger">Delete</a>
+              {% endif %}
+
+            </div>
+
+          </li>
+          {% endfor %}
+        </ul>
+        <nav>
+            <ul class="pagination justify-content-center mt-2">
+              {% if books.has_previous %}
+                <li class="page-item">
+                  <a class="page-link"
+                    href="?book_page={{ books.previous_page_number }}&book_search={{ request.GET.book_search }}">
+                    Previous
+                  </a>
+                </li>
+              {% endif %}
+
+              <li class="page-item disabled">
+                <span class="page-link">
+                  Page {{ books.number }} of {{ books.paginator.num_pages }}
+                </span>
+              </li>
+
+              {% if books.has_next %}
+                <li class="page-item">
+                  <a class="page-link"
+                    href="?book_page={{ books.next_page_number }}&book_search={{ request.GET.book_search }}">
+                    Next
+                  </a>
+                </li>
+              {% endif %}
+            </ul>
+        </nav>
+
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<script>
+  const ctx = document.getElementById('overviewChart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Schools', 'Books'],
+      datasets: [{
+        label: 'Total Count',
+        data: [{{ total_schools }}, {{ total_books }}],
+        borderWidth: 1
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+{% endblock %}
